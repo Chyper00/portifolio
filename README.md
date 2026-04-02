@@ -1,6 +1,6 @@
 # 💻 Hacker Portfolio
 
-> `$ sudo make me a portfolio --theme=hacker --vibe=lighthearted`
+> Feel free to clone this repo and use it, amiguinho.
 
 A dark, terminal-aesthetic React portfolio with Matrix rain, neon accents, custom cursor, and Framer Motion animations.
 
@@ -70,6 +70,20 @@ npm run preview
 ```
 
 Output in `dist/`.
+
+## 🌐 Deploy to GitHub Pages
+
+This project is configured for:
+- Repository: `Chyper00/portifolio`
+- URL: `https://chyper00.github.io/portifolio`
+
+Deploy command:
+
+```bash
+npm run deploy
+```
+
+If this is your first push, make sure the repository is connected as `origin` and your branch is on GitHub.
 
 ---
 
