@@ -1,3 +1,14 @@
+const avatarPath =
+  import.meta.env.VITE_AVATAR_URL ||
+  'https://placehold.co/64x64/141820/00ff41?text=:)'
+
+const socialLinks = [
+  { label: 'Discord', url: import.meta.env.VITE_SOCIAL_DISCORD || 'https://discord.com/users/your-id-here' },
+  { label: 'LinkedIn', url: import.meta.env.VITE_SOCIAL_LINKEDIN || 'https://linkedin.com/in/your-user' },
+  { label: 'Twitter', url: import.meta.env.VITE_SOCIAL_TWITTER || 'https://twitter.com/your-user' },
+  { label: 'Medium', url: import.meta.env.VITE_SOCIAL_MEDIUM || 'https://medium.com/@your-user' },
+]
+
 const profile = {
   name: 'Diego',
   subtitle: '90s kid time traveler building internet stuff',
@@ -7,19 +18,14 @@ const profile = {
   timezone: 'UTC-3',
   nicknames: ['Neo', 'Cypher'],
   avatarAlt: 'Diego avatar',
-  avatarPath: '/avatar.jpg',
+  avatarPath,
   bio: [
     'I build digital products focused on real delivery.',
     'I enjoy challenging projects, productive late nights, and ideas that become products.',
     'If it can be simplified without losing quality, I simplify it.',
   ],
   aiProductivityLine: 'I love AI and use Cursor + Claude to boost productivity - put the AIs to work 🤖⚡',
-  socialLinks: [
-    { label: 'Discord', url: 'https://discord.com/users/your-id-here' },
-    { label: 'LinkedIn', url: 'https://linkedin.com/in/your-user' },
-    { label: 'Twitter', url: 'https://twitter.com/your-user' },
-    { label: 'Medium', url: 'https://medium.com/@your-user' },
-  ],
+  socialLinks,
   soloProjects: [
     {
       id: 1,

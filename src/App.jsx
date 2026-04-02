@@ -414,7 +414,6 @@ function Hero() {
                 <p className="text-hack-green font-bold">{profile.name}</p>
                 <p>aka {profile.nicknames.join(', ')}</p>
                 <p>{profile.aiProductivityLine}</p>
-                <p>// avatar: replace at public/avatar.jpg</p>
               </div>
             </div>
             <div className="border border-hack-border bg-hack-card rounded-sm p-4 text-xs text-hack-comment space-y-2">

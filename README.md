@@ -85,6 +85,32 @@ npm run deploy
 
 If this is your first push, make sure the repository is connected as `origin` and your branch is on GitHub.
 
+## 🖼️ Set Your Avatar
+
+Copy `.env.example` to `.env` and replace the values with your own links.
+
+```bash
+cp .env.example .env
+```
+
+Avatar and social links are loaded from env vars:
+
+- `VITE_AVATAR_URL`
+- `VITE_SOCIAL_DISCORD`
+- `VITE_SOCIAL_LINKEDIN`
+- `VITE_SOCIAL_TWITTER`
+- `VITE_SOCIAL_MEDIUM`
+
+Example `.env`:
+
+```env
+VITE_AVATAR_URL=https://your-image-url-here
+VITE_SOCIAL_DISCORD=https://discord.com/users/your-id
+VITE_SOCIAL_LINKEDIN=https://linkedin.com/in/your-user
+VITE_SOCIAL_TWITTER=https://twitter.com/your-user
+VITE_SOCIAL_MEDIUM=https://medium.com/@your-user
+```
+
 ---
 
 *// exit code 0 — have fun hacking*
