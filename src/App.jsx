@@ -291,7 +291,7 @@ function Nav() {
     >
       <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
         <a href="#" className="text-hack-green font-bold text-sm hover:shadow-neon-sm transition-all">
-          <span className="text-hack-comment">~/</span>portfolio
+          <span className="text-hack-comment">~/</span>diego-rocha
         </a>
         <div className="flex gap-1">
           {links.map(link => (
@@ -332,19 +332,19 @@ function Hero() {
         animate={{ opacity: 1 }}
         className="mb-12 text-hack-comment text-xs space-y-0.5"
       >
-        <p><span className="text-hack-dim">BIOS</span> {biosVersion} - loading personality matrix... (this is my age)</p>
-        <p><span className="text-hack-dim">CPU</span>: Brain (overclocked, poorly cooled)</p>
-        <p><span className="text-hack-dim">RAM</span>: Coffee-dependent, ~8 cups/day</p>
-        <p><span className="text-hack-green">OK</span>  all systems nominal. <span className="animate-blink">▐</span></p>
+        <p><span className="text-hack-dim">PROFILE</span> {biosVersion} — loading senior engineer profile...</p>
+        <p><span className="text-hack-dim">STACK</span>: Node.js · TypeScript · React · Python</p>
+        <p><span className="text-hack-dim">FOCUS</span>: Scalable systems · Clean architecture · Product delivery</p>
+        <p><span className="text-hack-green">OK</span>  profile ready. <span className="animate-blink">▐</span></p>
       </motion.div>
 
       <div className="space-y-6">
-        {/* Prompt + whoami */}
+        {/* Intro */}
         <div>
-          <p className="text-hack-comment text-sm mb-2">guest@portfolio:~$</p>
+          <p className="text-hack-comment text-sm mb-2">diego@engineering:~$</p>
           {phase >= 1 && (
             <h1 className="text-hack-green text-3xl sm:text-5xl font-black leading-none glitch-text">
-              <TypedText text="whoami" speed={80} />
+              <TypedText text="Senior Software Engineer" speed={60} />
             </h1>
           )}
         </div>
@@ -368,8 +368,8 @@ function Hero() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
             <div className="bg-hack-surface border border-hack-border rounded-sm p-4 font-mono text-sm">
               <span className="text-hack-comment">$ </span>
-              <span className="text-hack-green">sudo break things</span>
-              <span className="text-hack-text"> --fix</span>
+              <span className="text-hack-green">senior-engineer</span>
+              <span className="text-hack-text"> --ship --scale</span>
               <span className="text-hack-comment"> | {profile.role} // {profile.experience}</span>
             </div>
           </motion.div>
@@ -386,13 +386,13 @@ function Hero() {
               href="#projects"
               className="px-5 py-2 text-sm font-bold bg-hack-green text-hack-bg rounded-sm hover:shadow-neon transition-all duration-200 hover:-translate-y-0.5"
             >
-              ./view-projects
+              ./projects
             </a>
             <a
               href="#skills"
               className="px-5 py-2 text-sm font-bold border border-hack-green text-hack-green rounded-sm hover:bg-hack-green hover:text-hack-bg transition-all duration-200"
             >
-              ./inspect-skills
+              ./skills
             </a>
           </motion.div>
         )}
@@ -412,7 +412,7 @@ function Hero() {
               />
               <div className="text-xs text-hack-comment leading-relaxed">
                 <p className="text-hack-green font-bold">{profile.name}</p>
-                <p>aka {profile.nicknames.join(', ')}</p>
+                <p>{profile.role} · {profile.experience}</p>
                 <p>{profile.aiProductivityLine}</p>
               </div>
             </div>
@@ -458,7 +458,7 @@ const SKILLS = [
 function Skills() {
   return (
     <Section id="skills">
-      <SectionLabel command="inspect skills --verbose" label="capabilities" />
+      <SectionLabel command="cat skills.json" label="expertise" />
       <div className="flex flex-wrap gap-3">
         {SKILLS.map((skill, i) => (
           <motion.div
@@ -480,7 +480,7 @@ function Skills() {
         className="mt-8 text-hack-comment text-xs"
       >
         <span className="text-hack-green">{'>'}</span> {SKILLS.length} skills loaded.{' '}
-        <span className="text-hack-dim">// WARNING: may cause spontaneous debugging at 2am</span>
+        <span className="text-hack-dim">// production-grade craft, tested at scale</span>
       </motion.p>
     </Section>
   )
@@ -490,10 +490,10 @@ function Skills() {
 function Projects() {
   return (
     <Section id="projects">
-      <SectionLabel command="ls -la ./projects" label="work" />
+      <SectionLabel command="ls ./work" label="experience" />
       <div className="space-y-10">
         <div>
-          <p className="text-hack-green text-sm font-bold mb-4">$ ls ./late-night-solo-projects</p>
+          <p className="text-hack-green text-sm font-bold mb-4">$ ls ./solo-projects</p>
           <AnimatePresence mode="wait">
             <motion.div
               initial={{ opacity: 0 }}
@@ -510,7 +510,7 @@ function Projects() {
         </div>
 
         <div>
-          <p className="text-hack-cyan text-sm font-bold mb-4">$ ls ./team-projects</p>
+          <p className="text-hack-cyan text-sm font-bold mb-4">$ ls ./team-experience</p>
           <AnimatePresence mode="wait">
             <motion.div
               initial={{ opacity: 0 }}
@@ -536,21 +536,20 @@ function Projects() {
 
 // ─── Hobbies ──────────────────────────────────────────────────────────────────
 const HOBBIES = [
-  { emoji: '🏋️', name: 'Gym',       comment: 'Compiling gains. Build failed: skipped leg day.' },
-  { emoji: '🥋', name: 'Jiu-Jitsu', comment: 'Social network with submission attempts.' },
-  { emoji: '🎨', name: 'Drawing',   comment: 'GUI for the brain. No dark mode yet.' },
-  { emoji: '🎸', name: 'Ukulele',   comment: '4-string instrument, 0 excuses not to play.' },
+  { emoji: '🏋️', name: 'Gym',       comment: 'Discipline that carries over to engineering.' },
+  { emoji: '🥋', name: 'Jiu-Jitsu', comment: 'Problem solving under pressure — on the mat.' },
+  { emoji: '🎨', name: 'Drawing',   comment: 'Visual thinking for better product decisions.' },
+  { emoji: '🎸', name: 'Ukulele',   comment: 'Small instrument, good reminder to keep things simple.' },
 ]
 
 function Hobbies() {
   return (
     <Section id="hobbies">
-      <SectionLabel command="apt-get install hobbies" label="interests" />
+      <SectionLabel command="cat interests.txt" label="beyond code" />
       <div className="bg-hack-surface border border-hack-border rounded-sm p-4 text-xs mb-8 space-y-1">
-        <p><span className="text-hack-dim">Reading package lists…</span></p>
-        <p><span className="text-hack-dim">Building dependency tree…</span></p>
-        <p><span className="text-hack-green">4 newly installed packages: gym jiu-jitsu drawing ukulele</span></p>
-        <p className="text-hack-comment">// Debugging my biceps and my code. One core dump at a time.</p>
+        <p><span className="text-hack-dim">Loading interests...</span></p>
+        <p><span className="text-hack-green">4 active: gym · jiu-jitsu · drawing · ukulele</span></p>
+        <p className="text-hack-comment">// Balance keeps the senior engineer sharp.</p>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {HOBBIES.map((h, i) => (
@@ -567,8 +566,8 @@ function Footer() {
     <footer className="border-t border-hack-border py-10 px-4">
       <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-hack-comment text-xs">
         <div className="space-y-1">
-          <p>© 2025 &nbsp;|&nbsp; <span className="text-hack-green">echo</span> <span className="text-hack-text">'Keep hacking, stay curious'</span></p>
-          <p className="text-hack-muted">// Made with caffeine, Linux, and questionable life choices.</p>
+          <p>© {new Date().getFullYear()} &nbsp;|&nbsp; <span className="text-hack-green">echo</span> <span className="text-hack-text">'Build well. Ship often.'</span></p>
+          <p className="text-hack-muted">// Senior Software Engineer · {profile.location}</p>
         </div>
         <div className="flex gap-4">
           {profile.socialLinks.map(link => (

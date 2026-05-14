@@ -11,12 +11,12 @@ const socialLinks = [
 
 const profile = {
   name: 'Diego',
-  subtitle: '90s kid time traveler building internet stuff',
-  role: 'Software Engineer',
+  subtitle: 'Senior Software Engineer · scalable products & system design',
+  role: 'Senior Software Engineer',
   experience: '7+ years',
   location: 'Campinas-SP, Brazil',
   timezone: 'UTC-3',
-  nicknames: ['Neo', 'Cypher'],
+  nicknames: [],
   avatarAlt: 'Diego avatar',
   avatarPath,
   bio: [
@@ -24,7 +24,7 @@ const profile = {
     'I enjoy challenging projects, productive late nights, and ideas that become products.',
     'If it can be simplified without losing quality, I simplify it.',
   ],
-  aiProductivityLine: 'I love AI and use Cursor + Claude to boost productivity - put the AIs to work 🤖⚡',
+  aiProductivityLine: 'I use AI tools (Cursor, Claude) to ship faster without cutting corners on quality.',
   socialLinks,
   soloProjects: [
     {

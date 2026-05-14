@@ -1,10 +1,10 @@
-# 💻 Hacker Portfolio
+# Diego Rocha — Senior Software Engineer Portfolio
 
-> Feel free to clone this repo and use it, amiguinho.
+> Feel free to clone this repo and use it.
 
-A dark, terminal-aesthetic React portfolio with Matrix rain, neon accents, custom cursor, and Framer Motion animations.
+A dark, terminal-aesthetic React portfolio for senior software engineers — neon accents, custom cursor, and Framer Motion animations.
 
-## ⚡ Quick Start
+## Quick Start
 
 ```bash
 npm install
@@ -13,14 +13,14 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173)
 
-## 🔧 Tech Stack
+## Tech Stack
 
 - **Vite** + **React 18**
-- **Tailwind CSS** (custom hacker theme)
+- **Tailwind CSS** (custom terminal theme)
 - **Framer Motion** (scroll & hover animations)
 - **JetBrains Mono** font
 
-## 📁 Structure
+## Structure
 
 ```
 src/
@@ -28,29 +28,25 @@ src/
 ├── main.jsx             # Entry point
 ├── index.css            # Tailwind + custom effects (scanlines, cursor, scrollbar)
 └── data/
-    └── projects.json    # ← Edit this to add/remove projects
+    └── profile.js       # ← Edit this to add/remove projects and copy
 ```
 
-## ✏️ Customizing Projects
+## Customizing Projects
 
-Edit `src/data/projects.json`. Each project:
+Edit `src/data/profile.js`. Each project:
 
-```json
+```js
 {
-  "id": 7,
-  "title": "My Cool Project",
-  "description": "What it does and why it's cool.",
-  "url": "https://myproject.com",        // optional — omit or set "" to hide
-  "category": "Backend",
-  "languages": ["Rust", "Go"],
-  "repoLink": "https://github.com/...",  // optional
-  "demoLink": null                       // null or "" = no button shown
+  id: 7,
+  title: 'My Cool Project',
+  description: 'What it does and why it matters.',
+  url: 'https://myproject.com',   // optional — omit or "" to hide
+  category: 'Solo',               // or 'Team'
+  languages: ['React', 'Node.js'],
 }
 ```
 
-> Any field that is `null`, `""`, or omitted will **not** render a button. Zero broken links.
-
-## 🎨 Hacker Color Palette
+## Color Palette
 
 | Token             | Value     | Usage               |
 |-------------------|-----------|---------------------|
@@ -62,38 +58,26 @@ Edit `src/data/projects.json`. Each project:
 | `hack-comment`    | `#4a6650` | Muted / comments    |
 | `hack-text`       | `#c8ffd4` | Body text           |
 
-## 🚀 Build for Production
+## Build for Production
 
 ```bash
 npm run build
 npm run preview
 ```
 
-Output in `dist/`.
-
-## 🌐 Deploy to GitHub Pages
-
-This project is configured for:
-- Repository: `Chyper00/portifolio`
-- URL: `https://chyper00.github.io/portifolio`
-
-Deploy command:
+## Deploy to GitHub Pages
 
 ```bash
 npm run deploy
 ```
 
-If this is your first push, make sure the repository is connected as `origin` and your branch is on GitHub.
+Live: [chyper00.github.io/portifolio](https://chyper00.github.io/portifolio)
 
-## 🖼️ Set Your Avatar
-
-Copy `.env.example` to `.env` and replace the values with your own links.
+## Avatar & Social Links
 
 ```bash
 cp .env.example .env
 ```
-
-Avatar and social links are loaded from env vars:
 
 - `VITE_AVATAR_URL`
 - `VITE_SOCIAL_DISCORD`
@@ -101,16 +85,6 @@ Avatar and social links are loaded from env vars:
 - `VITE_SOCIAL_TWITTER`
 - `VITE_SOCIAL_MEDIUM`
 
-Example `.env`:
-
-```env
-VITE_AVATAR_URL=https://your-image-url-here
-VITE_SOCIAL_DISCORD=https://discord.com/users/your-id
-VITE_SOCIAL_LINKEDIN=https://linkedin.com/in/your-user
-VITE_SOCIAL_TWITTER=https://twitter.com/your-user
-VITE_SOCIAL_MEDIUM=https://medium.com/@your-user
-```
-
 ---
 
-*// exit code 0 — have fun hacking*
+*// build well. ship often.*
