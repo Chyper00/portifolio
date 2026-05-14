@@ -1,650 +1,584 @@
-import { useState, useEffect, useRef } from 'react'
-import { motion, useInView, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import profile from './data/profile'
 
-function getBiosVersion(birthDate = '1992-04-23') {
-  const now = new Date()
-  const birth = new Date(birthDate)
-  let age = now.getFullYear() - birth.getFullYear()
-  const hadBirthdayThisYear =
-    now.getMonth() > birth.getMonth() ||
-    (now.getMonth() === birth.getMonth() && now.getDate() >= birth.getDate())
+// ─── File tree config ──────────────────────────────────────────────────────────
+const FILES = [
+  { id: 'readme', label: 'README.md', icon: '📄', shortcut: '1' },
+  { id: 'experience', label: 'experience.json', icon: '📋', shortcut: '2' },
+  { id: 'projects', label: 'projects/', icon: '📁', shortcut: '3' },
+  { id: 'skills', label: 'skills.ts', icon: '⚡', shortcut: '4' },
+  { id: 'interests', label: 'interests.md', icon: '✦', shortcut: '5' },
+  { id: 'contact', label: 'contact.sh', icon: '📡', shortcut: '6' },
+]
 
-  if (!hadBirthdayThisYear) age -= 1
+const FILE_MAP = Object.fromEntries(FILES.map(f => [f.id, f]))
 
-  const major = Math.floor(age / 10)
-  const minor = age % 10
-  const currentMonth = now.getMonth() + 1
+// ─── Icons ─────────────────────────────────────────────────────────────────────
+const IconClose = () => (
+  <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.5" fill="#ff5f57" /></svg>
+)
+const IconMin = () => (
+  <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.5" fill="#febc2e" /></svg>
+)
+const IconMax = () => (
+  <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.5" fill="#28c840" /></svg>
+)
 
-  return `v.${major}.${minor}.${currentMonth}`
-}
-
-// ─── Custom Cursor ─────────────────────────────────────────────────────────────
-function CustomCursor() {
-  const dot  = useRef(null)
-  const ring = useRef(null)
-
-  useEffect(() => {
-    const onMove = (e) => {
-      if (dot.current)  { dot.current.style.left  = e.clientX + 'px'; dot.current.style.top  = e.clientY + 'px' }
-      if (ring.current) { ring.current.style.left = e.clientX + 'px'; ring.current.style.top = e.clientY + 'px' }
-    }
-    const onEnter = () => { dot.current?.classList.add('hovering'); ring.current?.classList.add('hovering') }
-    const onLeave = () => { dot.current?.classList.remove('hovering'); ring.current?.classList.remove('hovering') }
-
-    document.addEventListener('mousemove', onMove)
-    document.querySelectorAll('a,button,[data-hover]').forEach(el => {
-      el.addEventListener('mouseenter', onEnter)
-      el.addEventListener('mouseleave', onLeave)
-    })
-    return () => document.removeEventListener('mousemove', onMove)
-  }, [])
-
-  return (
-    <>
-      <div ref={dot}  className="cursor-dot"  />
-      <div ref={ring} className="cursor-ring" />
-    </>
-  )
-}
-
-// ─── Typing Effect ──────────────────────────────────────────────────────────────
-function TypedText({ text, delay = 0, speed = 50, className = '' }) {
-  const [displayed, setDisplayed] = useState('')
-  const [done, setDone]           = useState(false)
+// ─── Command Palette ───────────────────────────────────────────────────────────
+function CommandPalette({ open, onClose, onSelect }) {
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
-    let i = 0
-    const timer = setTimeout(() => {
-      const interval = setInterval(() => {
-        setDisplayed(text.slice(0, i + 1))
-        i++
-        if (i >= text.length) { clearInterval(interval); setDone(true) }
-      }, speed)
-      return () => clearInterval(interval)
-    }, delay)
-    return () => clearTimeout(timer)
-  }, [text, delay, speed])
+    if (!open) setQuery('')
+  }, [open])
 
-  return (
-    <span className={className}>
-      {displayed}
-      {!done && <span className="animate-blink text-hack-green">█</span>}
-    </span>
+  const filtered = FILES.filter(f =>
+    f.label.toLowerCase().includes(query.toLowerCase())
   )
-}
 
-// ─── Section Wrapper ────────────────────────────────────────────────────────────
-function Section({ id, children, className = '' }) {
-  const ref    = useRef(null)
-  const inView = useInView(ref, { once: true, margin: '-80px' })
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
+  if (!open) return null
 
   return (
-    <motion.section
-      id={id}
-      ref={ref}
-      initial={{ opacity: 0, y: 40 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-      className={`py-20 px-4 max-w-5xl mx-auto ${className}`}
-    >
-      {children}
-    </motion.section>
-  )
-}
-
-// ─── Section Label ──────────────────────────────────────────────────────────────
-function SectionLabel({ command, label }) {
-  return (
-    <div className="mb-10">
-      <p className="text-hack-comment text-sm mb-1"># ── {label} ──────────────────</p>
-      <h2 className="text-hack-green text-xl font-bold">
-        <span className="text-hack-dim mr-2">$</span>{command}
-      </h2>
+    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: -8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96 }}
+        transition={{ duration: 0.15 }}
+        className="relative w-full max-w-md bg-ide-surface border border-ide-border rounded-xl shadow-panel overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
+        <motion.div className="flex items-center gap-2 px-4 py-3 border-b border-ide-border">
+          <span className="text-accent font-mono text-sm">›</span>
+          <input
+            autoFocus
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="go to file..."
+            className="flex-1 bg-transparent text-text text-sm outline-none placeholder:text-text-muted font-mono"
+          />
+          <span className="kbd">esc</span>
+        </motion.div>
+        <div className="max-h-64 overflow-y-auto py-1">
+          {filtered.map(f => (
+            <button
+              key={f.id}
+              onClick={() => { onSelect(f.id); onClose() }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-ide-panel transition-colors"
+            >
+              <span>{f.icon}</span>
+              <span className="font-mono text-sm text-text-secondary">{f.label}</span>
+              <span className="ml-auto kbd">{f.shortcut}</span>
+            </button>
+          ))}
+          {filtered.length === 0 && (
+            <p className="px-4 py-6 text-center text-text-muted text-sm font-mono">no matches</p>
+          )}
+        </div>
+      </motion.div>
     </div>
   )
 }
 
-// ─── Skill Badge ────────────────────────────────────────────────────────────────
-const SKILL_COLORS = {
-  React:          { bg: '#001a2e', border: '#00e5ff', text: '#00e5ff' },
-  TypeScript:     { bg: '#001428', border: '#3178c6', text: '#5aa3f5' },
-  Python:         { bg: '#1a1a00', border: '#f7d600', text: '#f7d600' },
-  'Machine Learning': { bg: '#1a0028', border: '#bf5fff', text: '#bf5fff' },
-  'Web Scraping': { bg: '#001a0a', border: '#00cc66', text: '#00cc66' },
-  'Web Crawler':  { bg: '#001a0a', border: '#00cc66', text: '#00cc66' },
-  Blockchain:     { bg: '#1a0a00', border: '#ff6b00', text: '#ff8c00' },
-  Web3:           { bg: '#1a0014', border: '#ff00aa', text: '#ff44bb' },
-  Linux:          { bg: '#0a0a1a', border: '#00ff41', text: '#00ff41' },
-  'Node.js':      { bg: '#001a00', border: '#6cc24a', text: '#6cc24a' },
-  GraphQL:        { bg: '#1a0016', border: '#e535ab', text: '#e535ab' },
-  Cypress:        { bg: '#001a12', border: '#17202a', text: '#00c9a7' },
-  TDD:            { bg: '#1a1a00', border: '#ffd700', text: '#ffd700' },
-}
-
-function SkillBadge({ skill }) {
-  const color = SKILL_COLORS[skill] || { bg: '#141820', border: '#1e2530', text: '#00ff41' }
+// ─── Content views ─────────────────────────────────────────────────────────────
+function ReadmeView() {
   return (
-    <motion.div
-      whileHover={{ scale: 1.08, y: -2 }}
-      whileTap={{ scale: 0.96 }}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-bold cursor-default select-none"
-      style={{
-        background: color.bg,
-        border: `1px solid ${color.border}44`,
-        color: color.text,
-        boxShadow: `0 0 8px ${color.border}22`,
-        transition: 'all 0.2s ease',
-      }}
-      onHoverStart={e => {
-        e.target.style.borderColor = color.border
-        e.target.style.boxShadow   = `0 0 12px ${color.border}66`
-      }}
-      onHoverEnd={e => {
-        e.target.style.borderColor = `${color.border}44`
-        e.target.style.boxShadow   = `0 0 8px ${color.border}22`
-      }}
-    >
-      <span style={{ color: color.border, opacity: 0.7 }}>▸</span>
-      {skill}
-    </motion.div>
-  )
-}
-
-// ─── Category Filter ────────────────────────────────────────────────────────────
-// ─── Project Card ───────────────────────────────────────────────────────────────
-const CATEGORY_COLORS = {
-  Blockchain:       '#ff8c00',
-  'Machine Learning': '#bf5fff',
-  Integration:      '#00e5ff',
-  'Dev Tools':      '#00ff41',
-  Backend:          '#6cc24a',
-}
-
-function ProjectCard({ project, index }) {
-  const catColor = CATEGORY_COLORS[project.category] || '#00ff41'
-  const links = [
-    project.repoLink && { href: project.repoLink, label: 'repo', icon: '⎇' },
-    project.demoLink && { href: project.demoLink, label: 'demo', icon: '↗' },
-    project.url      && { href: project.url,      label: 'link', icon: '⬡' },
-  ].filter(Boolean)
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.4, delay: index * 0.08 }}
-      whileHover={{ y: -4 }}
-      className="relative group rounded-sm border border-hack-border bg-hack-card p-5 flex flex-col gap-3 overflow-hidden"
-      style={{ transition: 'border-color 0.2s ease, box-shadow 0.2s ease' }}
-      onMouseEnter={e => {
-        e.currentTarget.style.borderColor = `${catColor}66`
-        e.currentTarget.style.boxShadow   = `0 0 20px ${catColor}22`
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.borderColor = ''
-        e.currentTarget.style.boxShadow   = ''
-      }}
-    >
-      {/* Corner accent */}
-      <span
-        className="absolute top-0 right-0 w-0 h-0 group-hover:w-10 group-hover:h-10 transition-all duration-300"
-        style={{
-          borderTop:   `2px solid ${catColor}`,
-          borderRight: `2px solid ${catColor}`,
-        }}
-      />
-
-      {/* Category */}
-      <div className="flex items-center justify-between">
-        <span
-          className="text-xs font-bold px-2 py-0.5 rounded-sm"
-          style={{ background: `${catColor}18`, color: catColor, border: `1px solid ${catColor}44` }}
-        >
-          {project.category}
-        </span>
-        <span className="text-hack-comment text-xs">#{String(project.id).padStart(2,'0')}</span>
+    <div className="animate-fade-in space-y-8 font-mono text-sm leading-relaxed">
+      <div>
+        <p className="text-syntax-keyword text-base mb-2">
+          # <span className="text-text">{profile.fullName}</span>
+        </p>
+        <p className="text-syntax-comment pl-4 border-l-2 border-ide-border">
+          {'> '}{profile.headline}
+        </p>
       </div>
 
-      {/* Title */}
-      <h3 className="text-hack-text font-bold text-base leading-tight group-hover:text-hack-green transition-colors duration-200">
-        {project.title}
-      </h3>
-
-      {/* Description */}
-      <p className="text-hack-comment text-xs leading-relaxed flex-1">
-        // {project.description}
-      </p>
-
-      {/* Languages */}
-      <div className="flex flex-wrap gap-1.5">
-        {project.languages.map(lang => (
-          <span key={lang} className="tag-chip">{lang}</span>
-        ))}
-      </div>
-
-      {/* Links */}
-      {links.length > 0 && (
-        <div className="flex gap-2 pt-1 border-t border-hack-border">
-          {links.map(({ href, label, icon }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-xs text-hack-comment hover:text-hack-green border border-hack-border hover:border-hack-green px-2.5 py-1 rounded-sm transition-all duration-150 hover:shadow-neon-sm"
-            >
-              <span>{icon}</span> {label}
-            </a>
-          ))}
+      <div>
+        <p className="text-syntax-keyword mb-3">## about</p>
+        <div className="space-y-3 text-text-secondary pl-1">
+          <p>
+            hi, i'm <span className="text-syntax-string">{profile.name.toLowerCase()}</span>.
+            {' '}{profile.role.toLowerCase()} based in{' '}
+            <span className="text-syntax-string">{profile.location.toLowerCase()}</span>.
+            {' '}{profile.experience} shipping software.
+          </p>
+          <p>{profile.philosophy}</p>
+          <p>{profile.mentoring}</p>
         </div>
-      )}
-    </motion.div>
-  )
-}
+      </div>
 
-// ─── Hobby Card ─────────────────────────────────────────────────────────────────
-function HobbyCard({ emoji, name, comment, delay = 0 }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      whileHover={{ y: -4, scale: 1.02 }}
-      transition={{ duration: 0.4, delay }}
-      viewport={{ once: true }}
-      className="flex flex-col items-center gap-2 p-5 rounded-sm border border-hack-border bg-hack-card text-center cursor-default"
-    >
-      <motion.span
-        className="text-3xl"
-        animate={{ y: [0, -4, 0] }}
-        transition={{ duration: 2.5, delay: delay + 0.5, repeat: Infinity, ease: 'easeInOut' }}
-      >
-        {emoji}
-      </motion.span>
-      <span className="text-hack-green font-bold text-sm">{name}</span>
-      <span className="text-hack-comment text-xs leading-relaxed">// {comment}</span>
-    </motion.div>
-  )
-}
+      <div>
+        <p className="text-syntax-keyword mb-3">## engineer.ts</p>
+        <motion.div className="rounded-lg border border-ide-border bg-ide-panel p-4 overflow-x-auto">
+          <p className="text-syntax-keyword">
+            export const <span className="text-syntax-func">engineer</span> = {'{'}
+          </p>
+          <div className="pl-4 space-y-1">
+            <p><span className="text-syntax-property">role</span>: <span className="text-syntax-string">"{profile.role}"</span>,</p>
+            <p><span className="text-syntax-property">location</span>: <span className="text-syntax-string">"{profile.location}"</span>,</p>
+            <p><span className="text-syntax-property">experience</span>: <span className="text-syntax-string">"{profile.experience}"</span>,</p>
+            <p><span className="text-syntax-property">timezone</span>: <span className="text-syntax-string">"{profile.timezone}"</span>,</p>
+            <p className="pt-1">
+              <span className="text-syntax-property">stack</span>: [
+              {profile.techStack.map((t, i) => (
+                <span key={t}>
+                  <span className="text-syntax-string"> "{t}"</span>
+                  {i < profile.techStack.length - 1 ? ', ' : ''}
+                </span>
+              ))}
+              ],
+            </p>
+          </div>
+          <p className="text-syntax-keyword">{'}'}</p>
+        </motion.div>
+      </div>
 
-// ─── Nav ─────────────────────────────────────────────────────────────────────────
-function Nav() {
-  const [scrolled, setScrolled] = useState(false)
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 30)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  const links = ['about', 'skills', 'projects', 'hobbies']
-
-  return (
-    <motion.nav
-      initial={{ y: -60, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-hack-bg/95 backdrop-blur-sm border-b border-hack-border' : ''
-      }`}
-    >
-      <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-        <a href="#" className="text-hack-green font-bold text-sm hover:shadow-neon-sm transition-all">
-          <span className="text-hack-comment">~/</span>portfolio
-        </a>
-        <div className="flex gap-1">
-          {links.map(link => (
-            <a
-              key={link}
-              href={`#${link}`}
-              className="px-3 py-1 text-xs text-hack-comment hover:text-hack-green hover:bg-hack-surface rounded-sm transition-all duration-150"
-            >
-              ./{link}
-            </a>
+      <div>
+        <p className="text-syntax-keyword mb-3">## explore this repo</p>
+        <div className="rounded-lg border border-ide-border overflow-hidden text-xs">
+          <div className="grid grid-cols-[1fr_auto] gap-4 px-4 py-2 bg-ide-panel border-b border-ide-border text-text-muted">
+            <span>file</span>
+            <span>what's inside</span>
+          </div>
+          {[
+            ['experience.json', 'teams & companies'],
+            ['projects/', 'solo side projects'],
+            ['skills.ts', 'technical expertise'],
+            ['interests.md', 'currently exploring'],
+            ['contact.sh', 'reach out'],
+          ].map(([file, desc]) => (
+            <div key={file} className="grid grid-cols-[1fr_auto] gap-4 px-4 py-2 border-b border-ide-border last:border-0 hover:bg-ide-panel/50 transition-colors">
+              <span className="text-syntax-string">{file}</span>
+              <span className="text-text-muted">{desc}</span>
+            </div>
           ))}
         </div>
       </div>
-    </motion.nav>
-  )
-}
 
-// ─── Hero ─────────────────────────────────────────────────────────────────────────
-function Hero() {
-  const [phase, setPhase] = useState(0)
-  const biosVersion = getBiosVersion()
-
-  useEffect(() => {
-    const timers = [
-      setTimeout(() => setPhase(1), 600),
-      setTimeout(() => setPhase(2), 1400),
-      setTimeout(() => setPhase(3), 2600),
-      setTimeout(() => setPhase(4), 4000),
-    ]
-    return () => timers.forEach(clearTimeout)
-  }, [])
-
-  return (
-    <section id="about" className="min-h-screen flex flex-col justify-center px-4 max-w-5xl mx-auto pt-20">
-      {/* Boot sequence */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="mb-12 text-hack-comment text-xs space-y-0.5"
-      >
-        <p><span className="text-hack-dim">BIOS</span> {biosVersion} - loading personality matrix... (this is my age)</p>
-        <p><span className="text-hack-dim">CPU</span>: Brain (overclocked, poorly cooled)</p>
-        <p><span className="text-hack-dim">RAM</span>: Coffee-dependent, ~8 cups/day</p>
-        <p><span className="text-hack-green">OK</span>  all systems nominal. <span className="animate-blink">▐</span></p>
-      </motion.div>
-
-      <div className="space-y-6">
-        {/* Prompt + whoami */}
-        <div>
-          <p className="text-hack-comment text-sm mb-2">guest@portfolio:~$</p>
-          {phase >= 1 && (
-            <h1 className="text-hack-green text-3xl sm:text-5xl font-black leading-none glitch-text">
-              <TypedText text="whoami" speed={80} />
-            </h1>
-          )}
-        </div>
-
-        {phase >= 2 && (
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }}>
-            <div className="border-l-2 border-hack-green pl-5 space-y-2">
-              <p className="text-hack-text text-lg sm:text-2xl font-bold">
-                {profile.name} <span className="text-hack-comment font-normal text-base">// {profile.subtitle}</span>
-              </p>
-              <p className="text-hack-comment text-sm">
-                📍 {profile.location} &nbsp;·&nbsp;
-                <span className="text-hack-cyan">{profile.timezone}</span>
-                &nbsp;(I'm awake, I promise)
-              </p>
-            </div>
-          </motion.div>
-        )}
-
-        {phase >= 3 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-            <div className="bg-hack-surface border border-hack-border rounded-sm p-4 font-mono text-sm">
-              <span className="text-hack-comment">$ </span>
-              <span className="text-hack-green">sudo break things</span>
-              <span className="text-hack-text"> --fix</span>
-              <span className="text-hack-comment"> | {profile.role} // {profile.experience}</span>
-            </div>
-          </motion.div>
-        )}
-
-        {phase >= 4 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="flex flex-wrap gap-3 pt-2"
-          >
-            <a
-              href="#projects"
-              className="px-5 py-2 text-sm font-bold bg-hack-green text-hack-bg rounded-sm hover:shadow-neon transition-all duration-200 hover:-translate-y-0.5"
-            >
-              ./view-projects
-            </a>
-            <a
-              href="#skills"
-              className="px-5 py-2 text-sm font-bold border border-hack-green text-hack-green rounded-sm hover:bg-hack-green hover:text-hack-bg transition-all duration-200"
-            >
-              ./inspect-skills
-            </a>
-          </motion.div>
-        )}
-
-        {phase >= 4 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl pt-3"
-          >
-            <div className="border border-hack-border bg-hack-card rounded-sm p-4 flex items-center gap-4">
-              <img
-                src={profile.avatarPath}
-                alt={profile.avatarAlt}
-                className="w-16 h-16 rounded-sm object-cover border border-hack-border"
-              />
-              <div className="text-xs text-hack-comment leading-relaxed">
-                <p className="text-hack-green font-bold">{profile.name}</p>
-                <p>aka {profile.nicknames.join(', ')}</p>
-                <p>{profile.aiProductivityLine}</p>
-              </div>
-            </div>
-            <div className="border border-hack-border bg-hack-card rounded-sm p-4 text-xs text-hack-comment space-y-2">
-              <p className="text-hack-green font-bold">Find me on the internet:</p>
-              <div className="flex flex-wrap gap-2">
-                {profile.socialLinks.map(link => (
-                  <a
-                    key={link.label}
-                    href={link.url || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-2.5 py-1 border border-hack-border rounded-sm hover:border-hack-green hover:text-hack-green transition-all duration-150"
-                  >
-                    {link.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </div>
-
-      {/* Scroll hint */}
-      <motion.div
-        className="mt-16 flex flex-col items-start gap-1 text-hack-comment text-xs"
-        animate={{ opacity: [0.4, 1, 0.4] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      >
-        <span>scroll to continue ↓</span>
-      </motion.div>
-    </section>
-  )
-}
-
-// ─── Skills ────────────────────────────────────────────────────────────────────
-const SKILLS = [
-  'React', 'TypeScript', 'Python', 'Machine Learning',
-  'Web Scraping', 'Web Crawler', 'Blockchain', 'Web3',
-  'Linux', 'Node.js', 'GraphQL', 'Cypress', 'TDD',
-]
-
-function Skills() {
-  return (
-    <Section id="skills">
-      <SectionLabel command="inspect skills --verbose" label="capabilities" />
-      <div className="flex flex-wrap gap-3">
-        {SKILLS.map((skill, i) => (
-          <motion.div
-            key={skill}
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.25, delay: i * 0.06 }}
-          >
-            <SkillBadge skill={skill} />
-          </motion.div>
-        ))}
-      </div>
-      <motion.p
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.8 }}
-        className="mt-8 text-hack-comment text-xs"
-      >
-        <span className="text-hack-green">{'>'}</span> {SKILLS.length} skills loaded.{' '}
-        <span className="text-hack-dim">// WARNING: may cause spontaneous debugging at 2am</span>
-      </motion.p>
-    </Section>
-  )
-}
-
-// ─── Projects ──────────────────────────────────────────────────────────────────
-function Projects() {
-  return (
-    <Section id="projects">
-      <SectionLabel command="ls -la ./projects" label="work" />
-      <div className="space-y-10">
-        <div>
-          <p className="text-hack-green text-sm font-bold mb-4">$ ls ./late-night-solo-projects</p>
-          <AnimatePresence mode="wait">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-            >
-              {profile.soloProjects.map((project, i) => (
-                <ProjectCard key={project.id} project={project} index={i} />
-              ))}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        <div>
-          <p className="text-hack-cyan text-sm font-bold mb-4">$ ls ./team-projects</p>
-          <AnimatePresence mode="wait">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-            >
-              {profile.teamProjects.map((project, i) => (
-                <ProjectCard key={project.id} project={project} index={i} />
-              ))}
-            </motion.div>
-          </AnimatePresence>
+      <div>
+        <p className="text-syntax-keyword mb-3">## shortcuts</p>
+        <div className="space-y-1.5 text-text-secondary">
+          <p><span className="text-syntax-type">⌘K</span> — command palette</p>
+          <p><span className="text-syntax-type">1–6</span> — jump to file</p>
+          <p><span className="text-syntax-type">tabs</span> — open multiple files from sidebar</p>
         </div>
       </div>
-      <p className="mt-6 text-hack-comment text-xs">
-        <span className="text-hack-green">{'>'}</span> {profile.soloProjects.length + profile.teamProjects.length} project(s) loaded.{' '}
-        <span className="text-hack-dim">// edit in src/data/profile.js</span>
-      </p>
-    </Section>
-  )
-}
 
-// ─── Hobbies ──────────────────────────────────────────────────────────────────
-const HOBBIES = [
-  { emoji: '🏋️', name: 'Gym',       comment: 'Compiling gains. Build failed: skipped leg day.' },
-  { emoji: '🥋', name: 'Jiu-Jitsu', comment: 'Social network with submission attempts.' },
-  { emoji: '🎨', name: 'Drawing',   comment: 'GUI for the brain. No dark mode yet.' },
-  { emoji: '🎸', name: 'Ukulele',   comment: '4-string instrument, 0 excuses not to play.' },
-]
-
-function Hobbies() {
-  return (
-    <Section id="hobbies">
-      <SectionLabel command="apt-get install hobbies" label="interests" />
-      <div className="bg-hack-surface border border-hack-border rounded-sm p-4 text-xs mb-8 space-y-1">
-        <p><span className="text-hack-dim">Reading package lists…</span></p>
-        <p><span className="text-hack-dim">Building dependency tree…</span></p>
-        <p><span className="text-hack-green">4 newly installed packages: gym jiu-jitsu drawing ukulele</span></p>
-        <p className="text-hack-comment">// Debugging my biceps and my code. One core dump at a time.</p>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {HOBBIES.map((h, i) => (
-          <HobbyCard key={h.name} {...h} delay={i * 0.1} />
-        ))}
-      </div>
-    </Section>
-  )
-}
-
-// ─── Footer ───────────────────────────────────────────────────────────────────
-function Footer() {
-  return (
-    <footer className="border-t border-hack-border py-10 px-4">
-      <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-hack-comment text-xs">
-        <div className="space-y-1">
-          <p>© 2025 &nbsp;|&nbsp; <span className="text-hack-green">echo</span> <span className="text-hack-text">'Keep hacking, stay curious'</span></p>
-          <p className="text-hack-muted">// Made with caffeine, Linux, and questionable life choices.</p>
-        </div>
-        <div className="flex gap-4">
+      <div>
+        <p className="text-syntax-keyword mb-3">## links</p>
+        <div className="space-y-1.5">
           {profile.socialLinks.map(link => (
+            <p key={link.label}>
+              <span className="text-text-muted">- </span>
+              <a
+                href={link.url || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-syntax-func hover:text-accent transition-colors"
+              >
+                {link.label}
+              </a>
+              <span className="text-syntax-comment"> → {link.url || 'coming soon'}</span>
+            </p>
+          ))}
+        </div>
+      </div>
+
+      <p className="text-syntax-comment pt-2 border-t border-ide-border">
+        {'// you found README.md — explore the sidebar or hit ⌘K'}
+      </p>
+    </div>
+  )
+}
+
+function ExperienceView() {
+  return (
+    <motion.div className="animate-fade-in">
+      <pre className="font-mono text-xs text-syntax-comment mb-6">
+        {'// experience.json — teams & companies'}
+      </pre>
+      <div className="space-y-3">
+        {profile.teamProjects.map((job, i) => (
+          <motion.div
+            key={job.id}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.04 }}
+            className="bento-card group"
+          >
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <h3 className="text-text font-medium text-sm group-hover:text-accent transition-colors">
+                {job.url ? (
+                  <a href={job.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                    {job.title}
+                  </a>
+                ) : job.title}
+              </h3>
+              <span className="font-mono text-[10px] text-text-muted shrink-0 px-2 py-0.5 rounded bg-ide-bg border border-ide-border">
+                {job.category}
+              </span>
+            </div>
+            <p className="text-text-secondary text-xs leading-relaxed mb-3">{job.description}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {job.languages.map(l => (
+                <span key={l} className="font-mono text-[10px] text-syntax-type px-2 py-0.5 rounded bg-ide-bg">
+                  {l}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
+  )
+}
+
+function ProjectsView() {
+  return (
+    <div className="animate-fade-in">
+      <pre className="font-mono text-xs text-syntax-comment mb-6">
+        {'// projects/ — solo builds, late nights, real problems'}
+      </pre>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {profile.soloProjects.map((p, i) => (
+          <motion.div
+            key={p.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.06 }}
+            className="bento-card group cursor-default"
+          >
+            <div className="absolute top-0 right-0 w-16 h-16 bg-accent/5 rounded-bl-full" />
+            <h3 className="text-text font-medium text-sm mb-2 group-hover:text-accent transition-colors">
+              {p.url ? (
+                <a href={p.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                  {p.title} ↗
+                </a>
+              ) : p.title}
+            </h3>
+            <p className="text-text-secondary text-xs leading-relaxed mb-3">{p.description}</p>
+            <motion.div className="flex flex-wrap gap-1.5">
+              {p.languages.map(l => (
+                <span key={l} className="font-mono text-[10px] text-syntax-string">{l}</span>
+              ))}
+            </motion.div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function SkillsView() {
+  return (
+    <div className="animate-fade-in font-mono text-sm leading-loose">
+      <p className="text-syntax-comment mb-4">{'// skills.ts'}</p>
+      <p><span className="text-syntax-keyword">export type</span> <span className="text-syntax-type">Expertise</span> =</p>
+      <p className="pl-4 text-syntax-keyword">|</p>
+      {profile.expertise.map(skill => (
+        <p key={skill} className="pl-8 text-syntax-string">"{skill}"</p>
+      ))}
+      <p className="pl-4 text-syntax-keyword">|</p>
+      <p className="mt-6 text-syntax-comment">{'// proficiency: senior-level across the board'}</p>
+      <p className="text-syntax-comment">{'// TDD enjoyer. SOLID believer. RFC reader.'}</p>
+    </div>
+  )
+}
+
+function InterestsView() {
+  return (
+    <div className="animate-fade-in">
+      <pre className="font-mono text-xs text-syntax-comment mb-6">{'# interests.md'}</pre>
+      <h2 className="text-text font-medium text-lg mb-4">Currently exploring</h2>
+      <ul className="space-y-3">
+        {profile.interests.map((item, i) => (
+          <motion.li
+            key={item}
+            initial={{ opacity: 0, x: -6 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className="flex items-center gap-3 text-sm text-text-secondary"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+            {item}
+          </motion.li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function ContactView() {
+  return (
+    <div className="animate-fade-in font-mono text-sm">
+      <p className="text-syntax-comment mb-4">{'#!/bin/bash'}</p>
+      <p className="text-syntax-comment mb-6">{'# contact.sh — reach out'}</p>
+      <div className="space-y-2 text-text-secondary">
+        <p><span className="text-syntax-func">echo</span> <span className="text-syntax-string">"open to interesting problems & hard conversations"</span></p>
+        <p className="pt-4 text-syntax-comment"># links</p>
+        {profile.socialLinks.map(link => (
+          <p key={link.label}>
+            <span className="text-syntax-func">open</span>{' '}
             <a
-              key={link.label}
               href={link.url || '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-hack-comment hover:text-hack-green transition-colors duration-150 flex items-center gap-1.5 text-xs"
+              className="text-syntax-string hover:text-accent transition-colors underline"
             >
-              <span>◈</span> {link.label}
+              "{link.url || link.label}"
             </a>
-          ))}
-        </div>
+            <span className="text-syntax-comment"> {' # '}{link.label}</span>
+          </p>
+        ))}
+        <p className="pt-4 text-syntax-comment">
+          # made with react. too much coffee. zero regrets.
+        </p>
       </div>
-    </footer>
+    </div>
   )
 }
 
-// ─── Matrix Rain Background (subtle) ──────────────────────────────────────────
-function MatrixRain() {
-  const canvasRef = useRef(null)
+const VIEWS = {
+  readme: ReadmeView,
+  experience: ExperienceView,
+  projects: ProjectsView,
+  skills: SkillsView,
+  interests: InterestsView,
+  contact: ContactView,
+}
+
+// ─── Mini terminal ─────────────────────────────────────────────────────────────
+function MiniTerminal() {
+  const [lines, setLines] = useState([])
+  const [cursor, setCursor] = useState(true)
 
   useEffect(() => {
-    const canvas  = canvasRef.current
-    const ctx     = canvas.getContext('2d')
-    let W = canvas.width  = window.innerWidth
-    let H = canvas.height = window.innerHeight
-    const cols    = Math.floor(W / 20)
-    const drops   = Array(cols).fill(1)
-    const chars   = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ'
-
-    const draw = () => {
-      ctx.fillStyle = 'rgba(10,12,15,0.05)'
-      ctx.fillRect(0, 0, W, H)
-      ctx.fillStyle = '#00ff4115'
-      ctx.font = '14px JetBrains Mono'
-      drops.forEach((y, i) => {
-        const char = chars[Math.floor(Math.random() * chars.length)]
-        ctx.fillText(char, i * 20, y * 20)
-        if (y * 20 > H && Math.random() > 0.975) drops[i] = 0
-        drops[i]++
-      })
-    }
-
-    const interval = setInterval(draw, 60)
-    const onResize = () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight }
-    window.addEventListener('resize', onResize)
-    return () => { clearInterval(interval); window.removeEventListener('resize', onResize) }
+    const script = [
+      { text: '$ whoami', delay: 400 },
+      { text: `> ${profile.name.toLowerCase()} — ${profile.role.toLowerCase()}`, delay: 900 },
+      { text: '$ cat /etc/location', delay: 1400 },
+      { text: `> ${profile.location} (${profile.timezone})`, delay: 1900 },
+      { text: '$ echo $STATUS', delay: 2400 },
+      { text: '> open to cool problems ✓', delay: 2900 },
+    ]
+    const timers = script.map(({ text, delay }) =>
+      setTimeout(() => setLines(prev => [...prev, text]), delay)
+    )
+    const blink = setInterval(() => setCursor(c => !c), 530)
+    return () => { timers.forEach(clearTimeout); clearInterval(blink) }
   }, [])
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed top-0 left-0 w-full h-full pointer-events-none"
-      style={{ zIndex: 0, opacity: 0.4 }}
-    />
+    <div className="border-t border-ide-border bg-ide-title px-4 py-2 font-mono text-[11px] text-text-muted overflow-hidden">
+      <div className="flex gap-6 overflow-x-auto whitespace-nowrap">
+        {lines.map((line, i) => (
+          <span key={i} className={line.startsWith('$') ? 'text-accent' : 'text-text-secondary'}>
+            {line}
+          </span>
+        ))}
+        <span className={cursor ? 'opacity-100' : 'opacity-0'}>▋</span>
+      </div>
+    </div>
   )
 }
 
-// ─── App ──────────────────────────────────────────────────────────────────────
+// ─── App ───────────────────────────────────────────────────────────────────────
 export default function App() {
+  const [activeFile, setActiveFile] = useState('readme')
+  const [openTabs, setOpenTabs] = useState(['readme'])
+  const [paletteOpen, setPaletteOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const openFile = useCallback((id) => {
+    setActiveFile(id)
+    setOpenTabs(prev => prev.includes(id) ? prev : [...prev, id])
+    setSidebarOpen(false)
+  }, [])
+
+  const closeTab = (id, e) => {
+    e.stopPropagation()
+    if (openTabs.length === 1) return
+    const next = openTabs.filter(t => t !== id)
+    setOpenTabs(next)
+    if (activeFile === id) setActiveFile(next[next.length - 1])
+  }
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setPaletteOpen(o => !o)
+      }
+      if (!paletteOpen && !e.metaKey && !e.ctrlKey && e.key >= '1' && e.key <= '6') {
+        const f = FILES[parseInt(e.key) - 1]
+        if (f) openFile(f.id)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [paletteOpen, openFile])
+
+  const ActiveView = VIEWS[activeFile]
+
   return (
-    <div className="relative min-h-screen bg-hack-bg scanlines crt-vignette">
-      <CustomCursor />
-      <MatrixRain />
-      <div className="relative z-10">
-        <Nav />
-        <main>
-          <Hero />
-          <Skills />
-          <Projects />
-          <Hobbies />
-        </main>
-        <Footer />
+    <div className="h-screen flex flex-col bg-ide-bg overflow-hidden">
+      {/* Title bar */}
+      <div className="flex items-center h-9 bg-ide-title border-b border-ide-border shrink-0 px-4 gap-3">
+        <div className="flex gap-1.5">
+          <IconClose /><IconMin /><IconMax />
+        </div>
+        <span className="flex-1 text-center font-mono text-[11px] text-text-muted truncate">
+          diego.rocha — ~/portfolio
+        </span>
+        <button
+          onClick={() => setPaletteOpen(true)}
+          className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded border border-ide-border text-[10px] text-text-muted hover:text-text-secondary hover:border-ide-border-bright transition-colors"
+        >
+          <span>⌘K</span>
+        </button>
       </div>
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Activity bar */}
+        <div className="hidden sm:flex flex-col items-center w-12 bg-ide-title border-r border-ide-border py-3 gap-3 shrink-0">
+          {['📁', '🔍', '⌥', '⚙'].map((icon, i) => (
+            <button
+              key={i}
+              className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm transition-colors ${
+                i === 0 ? 'bg-accent-dim text-accent' : 'text-text-muted hover:text-text-secondary hover:bg-ide-panel'
+              }`}
+            >
+              {icon}
+            </button>
+          ))}
+        </div>
+
+        {/* Sidebar */}
+        <aside className={`
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          sm:translate-x-0
+          fixed sm:relative z-40
+          w-56 h-full bg-ide-surface border-r border-ide-border
+          flex flex-col shrink-0 transition-transform duration-200
+        `}>
+          <div className="px-3 py-3 border-b border-ide-border">
+            <p className="font-mono text-[10px] text-text-muted uppercase tracking-widest">Explorer</p>
+          </div>
+          <div className="flex-1 overflow-y-auto p-2">
+            <p className="font-mono text-[10px] text-text-muted px-2 py-1 mb-1">PORTFOLIO</p>
+            {FILES.map(f => (
+              <button
+                key={f.id}
+                onClick={() => openFile(f.id)}
+                className={`file-row w-full ${activeFile === f.id ? 'active' : ''}`}
+              >
+                <span className="text-[11px]">{f.icon}</span>
+                <span className="font-mono truncate">{f.label}</span>
+              </button>
+            ))}
+          </div>
+          <div className="p-3 border-t border-ide-border">
+            <p className="font-mono text-[10px] text-text-muted leading-relaxed">
+              press <span className="kbd">⌘K</span> to jump
+              <br />
+              <span className="kbd">1</span>–<span className="kbd">6</span> quick nav
+            </p>
+          </div>
+        </aside>
+
+        {/* Mobile sidebar overlay */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 z-30 bg-black/50 sm:hidden" onClick={() => setSidebarOpen(false)} />
+        )}
+
+        {/* Editor area */}
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+          {/* Tabs */}
+          <div className="flex items-center bg-ide-surface border-b border-ide-border overflow-x-auto shrink-0">
+            <button
+              onClick={() => setSidebarOpen(o => !o)}
+              className="sm:hidden px-3 py-2 text-text-muted hover:text-text border-r border-ide-border"
+            >
+              ☰
+            </button>
+            {openTabs.map(tabId => {
+              const f = FILE_MAP[tabId]
+              return (
+                <button
+                  key={tabId}
+                  onClick={() => setActiveFile(tabId)}
+                  className={`tab ${activeFile === tabId ? 'active' : ''}`}
+                >
+                  <span>{f.icon}</span>
+                  <span>{f.label}</span>
+                  {openTabs.length > 1 && (
+                    <span
+                      onClick={e => closeTab(tabId, e)}
+                      className="ml-1 text-text-muted hover:text-text px-0.5"
+                    >
+                      ×
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 px-4 py-1.5 bg-ide-bg border-b border-ide-border shrink-0">
+            <span className="font-mono text-[10px] text-text-muted">
+              ~/portfolio/<span className="text-accent">{FILE_MAP[activeFile]?.label}</span>
+            </span>
+          </div>
+
+          {/* Content */}
+          <motion.div className="flex-1 overflow-y-auto dot-grid">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeFile}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="p-5 sm:p-8 max-w-3xl"
+              >
+                <ActiveView />
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+
+          <MiniTerminal />
+        </div>
+      </div>
+
+      {/* Status bar */}
+      <div className="flex items-center h-6 bg-accent px-3 gap-4 shrink-0 font-mono text-[10px] text-white/90">
+        <span>⎇ main</span>
+        <span className="hidden sm:inline">{profile.location}</span>
+        <span className="hidden sm:inline">UTF-8</span>
+        <span className="hidden sm:inline">{profile.techStack.slice(0, 4).join(' · ')}</span>
+        <span className="ml-auto">{profile.role}</span>
+      </div>
+
+      <AnimatePresence>
+        {paletteOpen && (
+          <CommandPalette
+            open={paletteOpen}
+            onClose={() => setPaletteOpen(false)}
+            onSelect={openFile}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
