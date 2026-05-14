@@ -1,47 +1,30 @@
 const avatarPath =
   import.meta.env.VITE_AVATAR_URL ||
-  'https://placehold.co/120x120/f1f3f4/1a73e8?text=D'
+  'https://placehold.co/64x64/141820/00ff41?text=:)'
 
 const socialLinks = [
+  { label: 'Discord', url: import.meta.env.VITE_SOCIAL_DISCORD || 'https://discord.com/users/your-id-here' },
   { label: 'LinkedIn', url: import.meta.env.VITE_SOCIAL_LINKEDIN || 'https://linkedin.com/in/your-user' },
-  { label: 'GitHub', url: import.meta.env.VITE_SOCIAL_GITHUB || 'https://github.com/chyper00' },
   { label: 'Twitter', url: import.meta.env.VITE_SOCIAL_TWITTER || 'https://twitter.com/your-user' },
   { label: 'Medium', url: import.meta.env.VITE_SOCIAL_MEDIUM || 'https://medium.com/@your-user' },
 ]
 
 const profile = {
-  fullName: 'Diego (dos Santos) Rocha',
   name: 'Diego',
-  headline:
-    'Senior Fullstack Engineer focused on scalable products, system design and high-performance web applications',
-  techStack: ['Node.js', 'Python', 'TypeScript', 'React', 'Next.js', 'Vue', 'IA', 'AWS', 'GCP'],
-  role: 'Senior Fullstack Engineer',
+  subtitle: '90s kid time traveler building internet stuff',
+  role: 'Software Engineer',
   experience: '7+ years',
   location: 'Campinas-SP, Brazil',
   timezone: 'UTC-3',
-  avatarAlt: 'Diego Rocha',
+  nicknames: ['Neo', 'Cypher'],
+  avatarAlt: 'Diego avatar',
   avatarPath,
-  expertise: [
-    'Node.js / TypeScript',
-    'Scalable Frontend Architecture',
-    'System Design',
-    'APIs & Backend Engineering',
-    'Clean Architecture & SOLID',
-    'TDD / E2E Testing',
-    'Product Engineering',
+  bio: [
+    'I build digital products focused on real delivery.',
+    'I enjoy challenging projects, productive late nights, and ideas that become products.',
+    'If it can be simplified without losing quality, I simplify it.',
   ],
-  mentoring:
-    'I also have experience mentoring developers, teaching programming and algorithms, and helping teams improve engineering quality, processes, and productivity.',
-  philosophy:
-    'Hands-on engineer focused on solving real business problems through simple, scalable, and maintainable solutions.',
-  interests: [
-    'Fullstack Engineering',
-    'Product Engineering',
-    'SaaS & Internal Tools',
-    'AI-assisted development workflows',
-    'High-performance web platforms',
-    'Developer Experience & Productivity',
-  ],
+  aiProductivityLine: 'I love AI and use Cursor + Claude to boost productivity - put the AIs to work 🤖⚡',
   socialLinks,
   soloProjects: [
     {

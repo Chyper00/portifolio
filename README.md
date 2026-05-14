@@ -1,10 +1,10 @@
-# Diego Rocha — Portfolio
+# 💻 Hacker Portfolio
 
-Interactive IDE-style portfolio for **Diego (dos Santos) Rocha**, Senior Fullstack Engineer.
+> Feel free to clone this repo and use it, amiguinho.
 
-Live: [chyper00.github.io/portifolio](https://chyper00.github.io/portifolio)
+A dark, terminal-aesthetic React portfolio with Matrix rain, neon accents, custom cursor, and Framer Motion animations.
 
-## Quick start
+## ⚡ Quick Start
 
 ```bash
 npm install
@@ -13,95 +13,104 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173)
 
-## Tech stack
+## 🔧 Tech Stack
 
 - **Vite** + **React 18**
-- **Tailwind CSS** (IDE dark theme)
-- **Framer Motion** (panel transitions)
-- **DM Sans** + **JetBrains Mono**
+- **Tailwind CSS** (custom hacker theme)
+- **Framer Motion** (scroll & hover animations)
+- **JetBrains Mono** font
 
-## Project structure
+## 📁 Structure
 
 ```
 src/
-├── App.jsx           # IDE shell, views, command palette
-├── main.jsx
-├── index.css         # IDE tokens & components
+├── App.jsx              # All components (Hero, Skills, Projects, Hobbies, Footer)
+├── main.jsx             # Entry point
+├── index.css            # Tailwind + custom effects (scanlines, cursor, scrollbar)
 └── data/
-    └── profile.js    # ← edit your content here
+    └── projects.json    # ← Edit this to add/remove projects
 ```
 
-## Customize content
+## ✏️ Customizing Projects
 
-All copy, projects, and links live in `src/data/profile.js`.
+Edit `src/data/projects.json`. Each project:
 
-```js
-const profile = {
-  fullName: 'Diego (dos Santos) Rocha',
-  name: 'Diego',
-  headline: '...',
-  techStack: ['Node.js', 'TypeScript', ...],
-  expertise: [...],
-  interests: [...],
-  soloProjects: [...],
-  teamProjects: [...],
-  socialLinks: [...],
-}
-```
-
-Each project:
-
-```js
+```json
 {
-  id: 1,
-  title: 'My Project',
-  description: 'What it does.',
-  url: 'https://...',       // optional — omit or "" to hide link
-  category: 'Solo',         // or 'Team'
-  languages: ['React', 'Node.js'],
+  "id": 7,
+  "title": "My Cool Project",
+  "description": "What it does and why it's cool.",
+  "url": "https://myproject.com",        // optional — omit or set "" to hide
+  "category": "Backend",
+  "languages": ["Rust", "Go"],
+  "repoLink": "https://github.com/...",  // optional
+  "demoLink": null                       // null or "" = no button shown
 }
 ```
 
-## Environment variables
+> Any field that is `null`, `""`, or omitted will **not** render a button. Zero broken links.
+
+## 🎨 Hacker Color Palette
+
+| Token             | Value     | Usage               |
+|-------------------|-----------|---------------------|
+| `hack-bg`         | `#0a0c0f` | Page background     |
+| `hack-surface`    | `#0f1117` | Input / code blocks |
+| `hack-card`       | `#141820` | Project cards       |
+| `hack-green`      | `#00ff41` | Primary accent      |
+| `hack-cyan`       | `#00e5ff` | Secondary accent    |
+| `hack-comment`    | `#4a6650` | Muted / comments    |
+| `hack-text`       | `#c8ffd4` | Body text           |
+
+## 🚀 Build for Production
+
+```bash
+npm run build
+npm run preview
+```
+
+Output in `dist/`.
+
+## 🌐 Deploy to GitHub Pages
+
+This project is configured for:
+- Repository: `Chyper00/portifolio`
+- URL: `https://chyper00.github.io/portifolio`
+
+Deploy command:
+
+```bash
+npm run deploy
+```
+
+If this is your first push, make sure the repository is connected as `origin` and your branch is on GitHub.
+
+## 🖼️ Set Your Avatar
+
+Copy `.env.example` to `.env` and replace the values with your own links.
 
 ```bash
 cp .env.example .env
 ```
 
-| Variable | Purpose |
-|----------|---------|
-| `VITE_AVATAR_URL` | Profile image URL |
-| `VITE_SOCIAL_LINKEDIN` | LinkedIn profile |
-| `VITE_SOCIAL_GITHUB` | GitHub profile |
-| `VITE_SOCIAL_TWITTER` | Twitter / X |
-| `VITE_SOCIAL_MEDIUM` | Medium blog |
+Avatar and social links are loaded from env vars:
 
-## Keyboard shortcuts (in the app)
+- `VITE_AVATAR_URL`
+- `VITE_SOCIAL_DISCORD`
+- `VITE_SOCIAL_LINKEDIN`
+- `VITE_SOCIAL_TWITTER`
+- `VITE_SOCIAL_MEDIUM`
 
-| Shortcut | Action |
-|----------|--------|
-| `⌘K` / `Ctrl+K` | Open command palette |
-| `1` – `6` | Jump to file in explorer |
+Example `.env`:
 
-## Build & deploy
-
-```bash
-npm run build
-npm run preview
-npm run deploy   # GitHub Pages → dist/
+```env
+VITE_AVATAR_URL=https://your-image-url-here
+VITE_SOCIAL_DISCORD=https://discord.com/users/your-id
+VITE_SOCIAL_LINKEDIN=https://linkedin.com/in/your-user
+VITE_SOCIAL_TWITTER=https://twitter.com/your-user
+VITE_SOCIAL_MEDIUM=https://medium.com/@your-user
 ```
-
-Configured for `https://chyper00.github.io/portifolio` (`base: '/portifolio/'` in `vite.config.js`).
-
-## Color tokens
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `ide-bg` | `#0c0c10` | Editor background |
-| `ide-surface` | `#12121a` | Sidebar / panels |
-| `accent` | `#7c6aef` | Primary accent |
-| `text` | `#e2e2ef` | Primary text |
 
 ---
 
-Built with React. Fork it, make it yours.
+*// exit code 0 — have fun hacking*

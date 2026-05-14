@@ -3,65 +3,160 @@
 @tailwind utilities;
 
 @layer base {
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
   html {
-    -webkit-font-smoothing: antialiased;
-    height: 100%;
+    scroll-behavior: smooth;
   }
 
   body {
-    background: #0c0c10;
-    color: #9898b0;
-    font-family: 'DM Sans', Inter, system-ui, sans-serif;
-    height: 100%;
-    overflow: hidden;
+    background-color: #0a0c0f;
+    color: #c8ffd4;
+    font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+    overflow-x: hidden;
+    cursor: none;
   }
 
-  #root { height: 100%; }
-
-  ::selection {
-    background: #7c6aef40;
-    color: #e2e2ef;
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
   }
-
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #35354a; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #5c5c72; }
+  ::-webkit-scrollbar-track {
+    background: #0a0c0f;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #00ff41;
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #39ff14;
+  }
 }
 
 @layer components {
-  .dot-grid {
-    background-image: radial-gradient(circle, #252530 1px, transparent 1px);
-    background-size: 20px 20px;
+  /* Scanline overlay */
+  .scanlines::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 255, 65, 0.015) 2px,
+      rgba(0, 255, 65, 0.015) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
   }
 
-  .file-row {
-    @apply flex items-center gap-1.5 px-2 py-1 rounded-md text-xs cursor-pointer
-           text-text-secondary hover:text-text hover:bg-ide-panel transition-colors select-none;
+  /* CRT vignette */
+  .crt-vignette::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
+    z-index: 9998;
   }
 
-  .file-row.active {
-    @apply bg-accent-dim text-text;
+  .terminal-prompt::before {
+    content: '> ';
+    color: #00ff41;
+    font-weight: 700;
   }
 
-  .tab {
-    @apply flex items-center gap-2 px-3 py-2 text-xs border-r border-ide-border
-           text-text-muted hover:text-text-secondary cursor-pointer transition-colors shrink-0;
+  .neon-border {
+    border: 1px solid #00ff41;
+    box-shadow: 0 0 6px #00ff4155, inset 0 0 6px #00ff4111;
   }
 
-  .tab.active {
-    @apply bg-ide-bg text-text border-t-2 border-t-accent;
+  .neon-border-hover {
+    transition: all 0.2s ease;
+  }
+  .neon-border-hover:hover {
+    border-color: #00ff41;
+    box-shadow: 0 0 12px #00ff4177, 0 0 24px #00ff4133;
   }
 
-  .bento-card {
-    @apply relative rounded-xl border border-ide-border bg-ide-panel p-4
-           hover:border-accent/40 hover:shadow-glow transition-all duration-300 overflow-hidden;
+  .tag-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: 2px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border: 1px solid #1e2530;
+    background: #141820;
+    color: #00ff41;
+    transition: all 0.15s ease;
+  }
+  .tag-chip:hover {
+    border-color: #00ff41;
+    box-shadow: 0 0 6px #00ff4155;
   }
 
-  .kbd {
-    @apply inline-flex items-center justify-center px-1.5 py-0.5 rounded
-           bg-ide-border text-text-muted font-mono text-[10px] border border-ide-border-bright;
+  .glitch-text {
+    animation: glitch 3s infinite;
   }
+
+  /* Matrix rain char flicker */
+  @keyframes char-flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+}
+
+/* Custom cursor */
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  background: #00ff41;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease, opacity 0.2s ease;
+  box-shadow: 0 0 6px #00ff41, 0 0 12px #00ff4166;
+}
+
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #00ff4188;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.15s ease, width 0.2s ease, height 0.2s ease;
+}
+
+.cursor-dot.hovering {
+  width: 12px;
+  height: 12px;
+  background: #00e5ff;
+  box-shadow: 0 0 10px #00e5ff;
+}
+
+.cursor-ring.hovering {
+  width: 40px;
+  height: 40px;
+  border-color: #00e5ff88;
 }
